@@ -4,95 +4,7 @@
     include('../function/reservaton_authentication.php');
     include('../function/hotel_invoice_authentication.php');
 
-    $hotel_name_data = hotel_name_form_view();
-    $currency_form_data = currency_form_view();
-    $advance_currency_form_data = advance_currency_form_view();
-    $source_form_data = source_form_view();
-    $status_form_data = status_form_view();
-    $payment_method_form_data = payment_method_form_view();
-    $hotel_names = [];
-    $currency_names = [];
-    $advance_currency_names = [];
-    $source_names = [];
-    $status_names = [];
-    $payment_method_names = [];
-    if (mysqli_num_rows($hotel_name_data) > 0) {
-        while ($hotel_name = mysqli_fetch_assoc($hotel_name_data)) {
-            $hotel_names[] = $hotel_name['hotel_name'];
-        }
-    }
-    if (mysqli_num_rows($currency_form_data) > 0) {
-        while ($currency_name = mysqli_fetch_assoc($currency_form_data)) {
-            $currency_names[] = $currency_name['currency'];
-        }
-    }
-    if (mysqli_num_rows($advance_currency_form_data) > 0) {
-        while ($advance_currency_name = mysqli_fetch_assoc($advance_currency_form_data)) {
-            $advance_currency_names[] = $advance_currency_name['advance_currency'];
-        }
-    }
-    if (mysqli_num_rows($source_form_data) > 0) {
-        while ($source_name = mysqli_fetch_assoc($source_form_data)) {
-            $source_names[] = $source_name['source'];
-        }
-    }
-    if (mysqli_num_rows($status_form_data) > 0) {
-        while ($status_name = mysqli_fetch_assoc($status_form_data)) {
-            $status_names[] = $status_name['status'];
-        }
-    }
-    if (mysqli_num_rows($payment_method_form_data) > 0) {
-        while ($payment_method_name = mysqli_fetch_assoc($payment_method_form_data)) {
-            $payment_method_names[] = $payment_method_name['payment'];
-        }
-    }
-
-    if (isset($_POST['reservation_delete'])) {
-        $result = reservation_delete();
-        if ($result['status'] == 'error') {
-            $errors = $result['message'];
-        } else {
-            $success = $result['message'];
-            header('Refresh: 1; URL=all_reservation.php');
-        }
-    }
-
-    if(isset($_POST['single_reservation_update'])){
-		$old=$_POST;
-		$result = single_reservation_update();
-		if($result['status'] == 'error'){
-			$error = $result['message'];
-		}else{
-			$update_success = $result['message'];
-            
-            header('Refresh: 1; URL=all_reservation.php');
-		}
-	}elseif(isset($_POST['multi_reservation_update'])){
-		$old=$_POST;
-		$result = multi_reservation_update();
-		if($result['status'] == 'error'){
-			$error = $result['message'];
-		}else{
-			$update_success = $result['message'];
-            
-            header('Refresh: 1; URL=all_reservation.php');
-		}
-	}
     
-    if(isset($_POST['single_reservation_status'])){
-		$old=$_POST;
-		$result = single_reservation_status();
-	}elseif(isset($_POST['multi_reservation_status'])){
-		$old=$_POST;
-		$result = multi_reservation_status();
-	}
-    if(isset($_POST['single_reservation_comment'])){
-		$old=$_POST;
-		$result = single_reservation_comment();
-	}elseif(isset($_POST['multi_reservation_comment'])){
-		$old=$_POST;
-		$result = multi_reservation_comment();
-	}
     
     $all_Invoice_data = allInvoiceView();
     $all_Invoice_data2 = allInvoiceView();
@@ -165,7 +77,13 @@
                                             <td class="px-2 py-1.5 whitespace-nowrap text-sm font-medium text-black"><?php echo $row['year'];?></td>
                                             <td class="px-2 py-1.5 whitespace-nowrap text-sm font-medium text-black"><?php echo $row['month'];?></td>
                                             <td class="px-2 py-1.5 whitespace-nowrap text-sm font-medium text-black">
-                                                <?php include "allhotelInvoiceView.php";?></td>
+                                                <a href="hotelInvoiceCopy.php?id=<?php echo $row['id']; ?>" 
+                                                    class="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-cyan-950" 
+                                                    target="_blank">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                                <?php //include "allhotelInvoiceView.php";?>
+                                            </td>
                                         </tr>
                                         <?php
                                                 }

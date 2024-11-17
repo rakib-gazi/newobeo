@@ -33,6 +33,43 @@
             'message' => 'Hotel name added successfull',
         ];
     }
+    function address(){
+        $db_connect = db_connect();
+        $hotel = mysqli_real_escape_string($db_connect,$_POST['hotel']);
+        $address = mysqli_real_escape_string($db_connect,$_POST['address']);
+
+        $error = [];
+        if(empty($hotel)){
+            $error['hotel'] = 'Hotel name is empty';
+        }
+        if(empty($address)){
+            $error['address'] = 'Hotel Address is empty';
+        }
+        
+        if(count($error)> 0){
+            return [
+				'status' => 'error',
+				'message' => $error,
+			 ];
+        }
+
+        $sql_insert = "INSERT INTO hotelAddress(hotel,address) VALUES ('$hotel','$address')";
+        $result =  mysqli_query ($db_connect,$sql_insert);
+        
+        if(mysqli_error($db_connect)){
+            die('Table Error:'.mysqli_error($db_connect));
+        }
+        return [
+            'status' => 'success',
+            'message' => 'Hotel Address added successfull',
+        ];
+    }
+    function hotelAddressView($starting_limit, $results_per_page) {
+        $db_connect = db_connect();
+        $sql_view = "SELECT * FROM hotelAddress LIMIT $starting_limit, $results_per_page";
+        $hotel_name_results = mysqli_query($db_connect, $sql_view);
+        return $hotel_name_results;
+    }
     function hotel_name_view($starting_limit, $results_per_page) {
         $db_connect = db_connect();
         $sql_view = "SELECT * FROM hotel_name LIMIT $starting_limit, $results_per_page";
@@ -41,6 +78,15 @@
     }
 
      
+	function hotelAddressFormView() {
+		$db_connect = db_connect();
+		$sql_view = "SELECT * FROM hotelAddress";
+		$hotel_name_form_results = mysqli_query($db_connect, $sql_view);
+		if (!$hotel_name_form_results) {
+			die('Query failed: ' . mysqli_error($db_connect));
+		}
+		return $hotel_name_form_results;
+	}
 	function hotel_name_form_view() {
 		$db_connect = db_connect();
 		$sql_view = "SELECT * FROM hotel_name";
@@ -78,6 +124,36 @@
 			return [
 				'status' => 'success',
 				'message' => 'Hotel Name Delete Successfull.',
+			];
+		
+	}
+    function hotelAddressDelete(){
+		$db_connect = db_connect();
+		$id = $_POST['delete_id'];
+		
+		$errors=[];
+		$sql_view = "SELECT * FROM hotelAddress WHERE id='$id'";
+		$result = mysqli_query($db_connect, $sql_view);
+		if(mysqli_num_rows($result) == 0){
+			$errors['data_delete'] = 'Unknown ID';
+		}
+		
+		if(count($errors) > 0){
+			return [
+				'status' => 'error',
+				'message' => $errors,
+			 ];
+		}
+		$sql_delete = "DELETE FROM hotelAddress WHERE id='$id'";
+		$result = mysqli_query($db_connect, $sql_delete);
+			
+			if(mysqli_error($db_connect)){
+				die('Table Error:'.mysqli_error($db_connect));
+			}
+			
+			return [
+				'status' => 'success',
+				'message' => 'Hotel Address Delete Successfull.',
 			];
 		
 	}
