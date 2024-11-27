@@ -977,16 +977,12 @@ video {
   max-width: 100px;
 }
 
-.max-w-\[00px\] {
-  max-width: 00px;
+.max-w-\[150px\] {
+  max-width: 150px;
 }
 
 .max-w-\[200px\] {
   max-width: 200px;
-}
-
-.max-w-\[150px\] {
-  max-width: 150px;
 }
 
 .flex-1 {

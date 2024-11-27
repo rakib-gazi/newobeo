@@ -1,17 +1,60 @@
 <?php 
 include ('dashboard-header.php');
-include ('../function/hotel_invoice_authentication.php');  
+include ('../function/hotel_invoice_authentication.php');
+include ('../function/settings_authentication.php');
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $hotelInvoiceCopyData = hotelInvoiceCopyView($id);
+    $hotelInvoiceCopyDataHotel = hotelInvoiceCopyViewHotel($id);
+    $hotelInvoiceCopyDataCommission = hotelInvoiceCopyViewCommission($id);
 } else {
     die('Reservation ID not provided.');
 }
 
+$ICCommission = null; // Ensure variable is defined
+if (mysqli_num_rows($hotelInvoiceCopyDataCommission) > 0) {
+    while ($ICCrow = mysqli_fetch_assoc($hotelInvoiceCopyDataCommission)) {
+        $ICCommission = $ICCrow['hotel'];
+    }
+}
+if ($ICCommission !== null) { // Ensure $ICHotel is set
+    $hotelCommissionData = hotelCommissionInvoiceView($ICCommission);
+} 
+if ($hotelCommissionData && mysqli_num_rows($hotelCommissionData) > 0) {
+    while ($currentCommission = mysqli_fetch_assoc($hotelCommissionData)) {
+        $hotelCollectsCommission = $currentCommission['hotelCollects']; // This will show the actual data in the row
+        $expediaCollectsCommission = $currentCommission['expediaCollects']; // This will show the actual data in the row
+    }
+} else {
+    $hotelCollectsCommission = 'Not Found';
+    $expediaCollectsCommission = 'Not Found';
+}
+$ICHotel = null; // Ensure variable is defined
+if (mysqli_num_rows($hotelInvoiceCopyDataHotel) > 0) {
+    while ($ICrow = mysqli_fetch_assoc($hotelInvoiceCopyDataHotel)) {
+        $ICHotel = $ICrow['hotel'];
+    }
+}
+
+if ($ICHotel !== null) { // Ensure $ICHotel is set
+    $hotelAddressData = hotelAddressInvoiceView($ICHotel);
+} 
+if ($hotelAddressData && mysqli_num_rows($hotelAddressData) > 0) {
+    while ($currentHotel = mysqli_fetch_assoc($hotelAddressData)) {
+        $hotelAddress = $currentHotel['address'] ; // This will show the actual data in the row
+    }
+} else {
+    $hotelAddress = 'Please Add Hotel Address';
+}
 $bookingComHotelCollects = 0;
 $expediaHotelCollects = 0;
 $expediaExpedaCollects = 0;
+function finalBalance($amount){
+    $topNewbalance = $amount;
+    return $topNewbalance;
+}
+var_dump($topNewbalance);
 ?>
 <!-- Sidebar and Content -->
 <div class="flex">
@@ -41,30 +84,10 @@ $expediaExpedaCollects = 0;
                 <div class="max-w-4xl mx-auto bg-white px-4 py-4 shadow-md rounded-lg">
                     <?php 
                     if (mysqli_num_rows($hotelInvoiceCopyData) > 0) {
-                        $months = [
-                            '01' => 'January',
-                            '02' => 'February',
-                            '03' => 'March',
-                            '04' => 'April',
-                            '05' => 'May',
-                            '06' => 'June',
-                            '07' => 'July',
-                            '08' => 'August',
-                            '09' => 'September',
-                            '10' => 'October',
-                            '11' => 'November',
-                            '12' => 'December'
-                        ];
+
                         while ($row = mysqli_fetch_assoc($hotelInvoiceCopyData)) {
-                            
-                            $month = $months[$row['month']] ?? 'Invalid Month';
-                            $hotelName = $row['hotel'];
-                            $hotelCollectsCommission = $row['hotelCollects'];
-                            $expediaCollectsCommission = $row['expediaCollects'];
-                            $hotelAddress = $row['address'];
                             $reservationData = json_decode($row['reservation_data'], true);
-                            $invoiceNo = $row['invoice_id'];
-                            $invoiceDate = $row['invoice_date'];
+                            $invoiceNo = date('d') . date('m') . date('y');
                             // Reset the bookingComHotelCollects for each invoice
                             $bookingComHotelCollects = 0;
 
@@ -96,24 +119,6 @@ $expediaExpedaCollects = 0;
                                     }
                                 }
                             }
-                            $commissionableAmountBooking = $bookingComHotelCollects * ((int)$hotelCollectsCommission / 100); 
-                            $commissionableAmountHotel = $expediaHotelCollects *((int)$hotelCollectsCommission / 100);
-                            $commissionableAmountExpedia = $expediaExpedaCollects * ((int)$expediaCollectsCommission / 100); // 20% commission
-                            $afterCommissionableAmountExpedia = $expediaExpedaCollects -$commissionableAmountExpedia;
-                            $newTotal = (($commissionableAmountBooking ?? 0) + ($commissionableAmountHotel ?? 0)) - ($afterCommissionableAmountExpedia ?? 0);
-                            // Check if the result is positive or negative and set the status
-                            $status = $newTotal > 0 ? true : false;
-
-                            // Remove the minus sign if the result is negative
-                            
-                            $formattedAmount = abs($newTotal);
-                            $roundedAmount = round($formattedAmount);
-
-                            $totalComission = round(
-                                ($commissionableAmountBooking ?? 0) +
-                                ($commissionableAmountHotel ?? 0) +
-                                ($commissionableAmountExpedia ?? 0)
-                            );
                             ?>
                             
                             <!-- Header -->
@@ -121,13 +126,13 @@ $expediaExpedaCollects = 0;
                                 <img src="../images/logo.png" alt="Logo" class="h-16">
                                 <h1 class="text-3xl font-semibold text-white font-obeo">INVOICE</h1>
                             </div>
-                            <div class="grid grid-cols-2 gap-4 mt-8">
+                            <div class="grid grid-cols-2 gap-4 mt-12">
                                 <!-- Bill to Info -->
                                 <div class="p-4 rounded-lg border-2 border-cyan-950">
                                     <h3 class="font-semibold text-medium font-obeo mb-2">Bill to</h3>
                                     <h3 class="font-semibold text-medium font-obeo">General Manager</h3>
                                     <h3 class="font-semibold text-medium font-obeo"><?php echo htmlspecialchars($row['hotel']); ?></h3>
-                                    <p class=""><?php echo htmlspecialchars($hotelAddress) ; ?></p>
+                                    <p class="w-1/2"><?php echo htmlspecialchars($hotelAddress) ; ?></p>
                                 </div>
                                 <div class="p-4 rounded-lg border-2 border-cyan-950">
                                     <table class="w-full ">
@@ -137,19 +142,19 @@ $expediaExpedaCollects = 0;
                                         </tr>
                                         <tr class="text-left">
                                             <th class="w-1/2 font-serif text-sm">Invoice Date</th>
-                                            <td class="w-1/2 text-black font-rflex text-sm"><?php echo $invoiceDate; ?></td>
+                                            <td class="w-1/2 text-black font-rflex text-sm"><?php echo date('d-m-Y'); ?></td>
                                         </tr>
                                         <tr class="text-left">
-                                            <th class="w-1/2 font-serif text-sm text-red-600"><?php echo $status? 'Amount Due' : 'Payable To Hotel' ?> </th>
-                                            <td class="w-1/2 text-red-600 font-rflex text-sm"><?php echo number_format($roundedAmount, 2)?> Tk</td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <th class="w-1/2 font-serif text-sm">Printing Date</th>
-                                            <td class="w-1/2 text-black font-rflex text-sm"><?php echo date('d F Y'); ?></td>
+                                            <th class="w-1/2 font-serif text-sm">Amount Due (USD)</th>
+                                            <td class="w-1/2 text-black font-rflex text-sm">$<?php echo $topNewbalance[0]; ?></td>
                                         </tr>
                                         <tr class="text-left">
                                             <th class="w-1/2 font-serif text-sm">Printing Time</th>
-                                            <td class="w-1/2 text-black font-rflex text-sm"><?php date_default_timezone_set('Asia/Dhaka'); echo date('h:i:s A'); ?></td>
+                                            <td class="w-1/2 text-black font-rflex text-sm"><?php date_default_timezone_set('Asia/Dhaka'); echo date('d-m-Y h:i:s A'); ?></td>
+                                        </tr>
+                                        <tr class="text-left">
+                                            <th class="w-1/2 font-serif text-sm">commsission</th>
+                                            <td class="w-1/2 text-black font-rflex text-sm"><?php echo $hotelCollectsCommission , $expediaCollectsCommission; ?></td>
                                         </tr>
                                     </table>
                                 </div>
@@ -193,11 +198,6 @@ $expediaExpedaCollects = 0;
                                                         </thead>
                                                         <tbody class="divide-y divide-cyan-950">
                                                             <?php
-                                                            usort($reservationData, function ($a, $b) {
-                                                                $dateA = DateTime::createFromFormat('d-m-Y', $a['C/in']);
-                                                                $dateB = DateTime::createFromFormat('d-m-Y', $b['C/in']);
-                                                                return $dateA->getTimestamp() - $dateB->getTimestamp();
-                                                            });
                                                             $serialNumber = 1;
                                                             $totalSum = 0; // Initialize total sum variable
 
@@ -280,11 +280,6 @@ $expediaExpedaCollects = 0;
                                                         </thead>
                                                         <tbody class="divide-y divide-cyan-950">
                                                             <?php
-                                                             usort($reservationData, function ($a, $b) {
-                                                                $dateA = DateTime::createFromFormat('d-m-Y', $a['C/in']);
-                                                                $dateB = DateTime::createFromFormat('d-m-Y', $b['C/in']);
-                                                                return $dateA->getTimestamp() - $dateB->getTimestamp();
-                                                            });
                                                             $serialNumber = 1;
                                                             $totalSum = 0; // Initialize total sum variable
 
@@ -366,11 +361,6 @@ $expediaExpedaCollects = 0;
                                                         </thead>
                                                         <tbody class="divide-y divide-cyan-950">
                                                             <?php
-                                                             usort($reservationData, function ($a, $b) {
-                                                                $dateA = DateTime::createFromFormat('d-m-Y', $a['C/in']);
-                                                                $dateB = DateTime::createFromFormat('d-m-Y', $b['C/in']);
-                                                                return $dateA->getTimestamp() - $dateB->getTimestamp();
-                                                            });
                                                             $serialNumber = 1;
                                                             $totalSum = 0; // Initialize total sum variable
 
@@ -428,16 +418,16 @@ $expediaExpedaCollects = 0;
                                                         <tr class="bg-cyan-950">
                                                             <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[100px]">Sl</th>
                                                             <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[100px]">Payment Method</th>
-                                                            <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[100px]">Amount(TK)</th>
+                                                            <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[100px]">Amount(BDT)</th>
                                                             <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[100px]">Commission</th>
                                                             <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[150px]">Comm. Amount</th>
-                                                            <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[100px]">Total(TK)</th>
+                                                            <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[100px]">Total</th>
                                                             <th scope="col" class="px-1 py-1.5 text-start text-xs font-medium text-white uppercase max-w-[200px]">Status</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody class="divide-y divide-cyan-950">
                                                         <?php if ($bookingComHotelCollects > 0) {
-                                                            
+                                                            $commissionableAmountBooking = $bookingComHotelCollects * ((int)$hotelCollectsCommission / 100); 
                                                         ?>
                                                             <tr class="border border-cyan-950">
                                                                 <td class="px-1 py-1.5 text-xs font-medium text-black"><?php echo $i++ ?></td>
@@ -450,6 +440,7 @@ $expediaExpedaCollects = 0;
                                                             </tr>
                                                         <?php } ?>
                                                         <?php if ($expediaHotelCollects > 0) {
+                                                            $commissionableAmountHotel = $expediaHotelCollects *((int)$hotelCollectsCommission / 100); // 20% commission expediaCollectsCommission
                                                         ?>
                                                             <tr class="border border-cyan-950">
                                                                 <td class="px-1 py-1.5 text-xs font-medium text-black"><?php echo $i++ ?></td>
@@ -462,6 +453,10 @@ $expediaExpedaCollects = 0;
                                                             </tr>
                                                         <?php } ?>
                                                         <?php if ($expediaExpedaCollects > 0) {
+                                                            $commissionableAmountExpedia = $expediaExpedaCollects * ((int)$expediaCollectsCommission / 100); // 20% commission
+                                                            $afterCommissionableAmountExpedia = $expediaExpedaCollects -$commissionableAmountExpedia;
+                                                            
+
                                                         ?>
                                                             <tr class="border border-cyan-950">
                                                                 <td class="px-1 py-1.5 text-xs font-medium text-black"><?php echo $i++ ?></td>
@@ -475,7 +470,23 @@ $expediaExpedaCollects = 0;
                                                             
                                                         <?php } ?>
                                                         <?php 
-                                                        
+                                                        $newTotal = (($commissionableAmountBooking ?? 0) + ($commissionableAmountHotel ?? 0)) - ($afterCommissionableAmountExpedia ?? 0);
+
+
+                                                        // Check if the result is positive or negative and set the status
+                                                        $status = $newTotal > 0 ? true : false;
+
+                                                        // Remove the minus sign if the result is negative
+                                                      
+                                                        $formattedAmount = abs($newTotal);
+                                                        $roundedAmount = round($formattedAmount);
+                                                        $topNewbalance = finalBalance($roundedAmount);
+
+                                                        $totalComission = round(
+                                                            ($commissionableAmountBooking ?? 0) +
+                                                            ($commissionableAmountHotel ?? 0) +
+                                                            ($commissionableAmountExpedia ?? 0)
+                                                        );
                                                         ?>
 
                                                             <tr class="border border-cyan-950">
@@ -509,43 +520,28 @@ $expediaExpedaCollects = 0;
                                     </div>
                                     <div class="flex justify-start items-center gap-x-4">
                                         <p class=""><i class="fa-solid fa-envelope text-white text-medium"></i></p>
-                                        <p class="text-white font-semibold text-sm">otabookingbd@gmail.com</p>
+                                        <p class="text-white font-semibold text-sm">contact@obeorooms.com</p>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex flex-col justify-center items-start">
-                                        <p class="text-white font-bold text-sm">Payment Details</p>
-                                        <p class="text-white text-sm">Obeo Limited, United Commercial Bank PLC</p>
-                                        <p class="text-white text-sm">Shyamoli Ring Road Branch</p>
-                                        <p class="text-white text-sm">Account No : 1802101000007299</p>
+                                        <p class="text-white font-semibold text-sm">Office Address</p>
+                                        <p class="text-white text-sm">123 Main Street,</p>
+                                        <p class="text-white text-sm">Springfield, IL 62701</p>
                                     </div>
                                 </div>
                             </div>
-                            
+                            <?php
+                        }
+                    } else {
+                        echo '<p>No hotel invoice data found.</p>';
+                    }
+                    ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-        function downloadPDF() {
-            var element = document.getElementById('booking_print');
-            var opt = {
-                margin: 0,
-                filename: 'Bill of <?php echo $month.' ('.$hotelName?>) <?php echo $status? 'Amount Due' : 'Payable To Hotel' ?> <?php echo number_format($roundedAmount, 2)?> Tk.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'A4', orientation: 'portrait' }
-            };
-            html2pdf().from(element).set(opt).save();
-        }
-    </script>
-</body>
-<?php
-        }
-    } else {
-        echo '<p>No hotel invoice data found.</p>';
-    }
-    ?>
-</html>
+
+<?php include ('dashboard-footer.php'); ?>

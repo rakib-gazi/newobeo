@@ -134,6 +134,7 @@
                                                 if (invoiceExists($row['hotel'], $_GET['month'] ?? $previousMonth, $_GET['year'] ?? $currentYear)) {
                                                     $buttonText = '<button type="submit" name="reservation_invoice" class="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-green-600">Update Invoice</button>';
                                                 }
+                                                //$address= hotelInvoiceCopyViewHotel($row['hotel'])
                                     ?>
                                     <tr class="border border-cyan-950">
                                         <td class="px-2 py-1.5 whitespace-nowrap text-sm font-medium text-black"><?php echo $i++; ?></td>

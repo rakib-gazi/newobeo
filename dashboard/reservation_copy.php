@@ -95,25 +95,50 @@
 
                                     //price in usd
                                     $is_price_usd = (isset($row["price"]) && $row["currency"] == 'USD' ) ? $row["price"] :0.00;
-                                    $price_format = $is_price_usd <= 9 ? '0' . number_format($is_price_usd, 2) : number_format($is_price_usd, 2);
-
+                                    $is_price_myr = (isset($row["price"]) && $row["currency"] == 'MYR' ) ? $row["price"] :0.00;
+                                    if(isset($row["price"]) && $row["currency"] == 'USD' ){
+                                        $price_format = $is_price_usd <= 9 ? '0' . number_format($is_price_usd, 2) : number_format($is_price_usd, 2);
+                                    }elseif((isset($row["price"]) && $row["currency"] == 'MYR' )){
+                                        $price_format = $is_price_myr <= 9 ? '0' . number_format($is_price_myr, 2) : number_format($is_price_myr, 2);
+                                    }
+                                    $total_price_currency = (isset($row["price"]) && $row["currency"] == 'MYR' ) ? 'MYR':'USD';
                                     //price in usd
                                     $is_exchange_rate = (isset($row["price"]) && $row["currency"] == 'USD' ) ? $row["rate"] :0.00;
 
                                     //price in BDT
-                                    $total_price_bdt =  $is_price_usd *  $is_exchange_rate;
-                                    $is_price_bdt = (isset($row["price"]) && $row["currency"] == 'BDT' ) ? $row["price"] : $total_price_bdt;
+                                    if(isset($row["price"]) && $row["currency"] == 'USD' ){
+                                        $total_price_bdt =  $is_price_usd *  $is_exchange_rate;
+                                    }elseif((isset($row["price"]) && $row["currency"] == 'MYR' )){
+                                        $total_price_bdt =  $is_price_myr;
+                                    }
+                                   $is_price_bdtk= (isset($row["price"]) && $row["currency"] == 'BDT' ) ? $row["price"] :$is_price_usd *  $is_exchange_rate;
+                                   $is_price_bdt= (isset($row["price"]) && $row["currency"] == 'BDT' ) ? $row["price"] :$total_price_bdt;
+                                    if(isset($row["price"]) && $row["currency"] == 'BDT' ){
+                                       $is_advance_price_bdt =   $row["price"];
+                                    }elseif(isset($row["price"]) && $row["currency"] == 'MYR' ){ 
+                                        $is_advance_price_bdt =   $row["price"];
+                                    }else{
+                                        $is_advance_price_bdt =   $total_price_bdt;
+                                    } 
 
                                      //total advance price
                                     $advance = isset($row['advance']) ? floatval($row['advance']) : 0.00;
+                                    $is_advance_myr = isset($row["advance"]) && $row["advance_currency"] == 'MYR' ?  floatval($row['advance']) : 0.00;
                                     $rate = isset($row['rate']) ? floatval($row['rate']) : 0.00;
                                     $total_advance = $advance * $rate;
-                                    $is_advance_usd = (isset($row["advance"]) && $row["advance_currency"] == 'USD' ) ? $total_advance : $advance;
-
+                                     
+                                    if(isset($row["advance"]) && $row["advance_currency"] == 'USD' ){
+                                        $is_advance_usd = $total_advance;
+                                    }elseif(isset($row["advance"]) && $row["advance_currency"] == 'MYR' ){
+                                        $is_advance_usd = $is_advance_myr;
+                                    }else{
+                                        $is_advance_usd = $advance;
+                                    } 
+                                    $total_advance_currency = (isset($row["advance"]) && $row["advance_currency"] == 'MYR' ) ? 'MYR':'TK';
                                     //total payable in hotel
-                                    $hotel_pay =  $is_price_bdt- $is_advance_usd;
+                                    $hotel_pay =  $is_advance_price_bdt- $is_advance_usd;
                                     //----- end  payment & pricing part -----------//
-
+                                    $total_hotel_pay_currency = (isset($row["currency"]) && $row["currency"] == 'MYR' ) ? 'MYR':'TK';
                                 
                                     // start room wise information & price details
 
@@ -272,8 +297,8 @@
                                                                 <hr class="border border-black">
                                                                 <table class="w-full mt-2">
                                                                     <tr class="text-left">
-                                                                        <th class="w-1/2 font-serif">Price (USD)</th>
-                                                                        <td class="w-1/2 text-black font-rflex"><?php echo $price_format ;?> USD</td>
+                                                                        <th class="w-1/2 font-serif">Price (<?php echo $total_price_currency;?>)</th>
+                                                                        <td class="w-1/2 text-black font-rflex"><?php echo $price_format ;?> <?php echo $total_price_currency;?></td>
                                                                     </tr>
                                                                     <tr class="text-left">
                                                                         <th class="w-1/2">Exchange Rate</th>
@@ -285,7 +310,7 @@
                                                                     </tr>
                                                                     <tr class="text-left">
                                                                         <th class="w-1/2 font-serif">Total Advance</th>
-                                                                        <td class="w-1/2 text-black font-rflex"><?php echo number_format( $is_advance_usd,2) ;?> TK</td>
+                                                                        <td class="w-1/2 text-black font-rflex"><?php echo number_format( $is_advance_usd,2) ;?><?php echo $total_advance_currency;?></td>
                                                                     </tr>
                                                                     <tr class="text-left">
                                                                         <th class="w-1/2 font-serif">Total Pay In Hotel</th>
@@ -462,8 +487,8 @@
                                                     <hr class="border border-black">
                                                     <table class="w-full mt-2">
                                                         <tr class="text-left">
-                                                            <th class="w-1/2 font-serif">Price (USD)</th>
-                                                            <td class="w-1/2 text-black font-rflex"><?php echo $price_format ;?> USD</td>
+                                                            <th class="w-1/2 font-serif">Price (<?php echo $total_price_currency;?>)</th>
+                                                            <td class="w-1/2 text-black font-rflex"><?php echo $price_format ;?> <?php echo $total_price_currency;?></td>
                                                         </tr>
                                                         <tr class="text-left">
                                                             <th class="w-1/2">Exchange Rate</th>
@@ -471,15 +496,15 @@
                                                         </tr>
                                                         <tr class="text-left">
                                                             <th class="w-1/2 font-serif">Total Price (BDT)</th>
-                                                            <td class="w-1/2 text-black font-rflex"><?php echo number_format( $is_price_bdt,2) ;?> TK</td>
+                                                            <td class="w-1/2 text-black font-rflex"><?php echo number_format( $is_price_bdtk,2) ;?> TK</td>
                                                         </tr>
                                                         <tr class="text-left">
                                                             <th class="w-1/2 font-serif">Total Advance</th>
-                                                            <td class="w-1/2 text-black font-rflex"><?php echo number_format( $is_advance_usd,2) ;?> TK</td>
+                                                            <td class="w-1/2 text-black font-rflex"><?php echo number_format( $is_advance_usd,2) ;?> <?php echo $total_advance_currency;?></td>
                                                         </tr>
                                                         <tr class="text-left">
                                                             <th class="w-1/2 font-serif">Total Pay In Hotel</th>
-                                                            <td class="w-1/2 text-black font-rflex"><?php echo number_format( $hotel_pay,2) ;?> TK</td> 
+                                                            <td class="w-1/2 text-black font-rflex"><?php echo number_format( $hotel_pay,2) ;?> <?php echo $total_hotel_pay_currency;?></td> 
                                                         </tr>
                                                         <tr class="text-left">
                                                             <th class="w-1/2 font-serif">Payment Method</th>
@@ -562,18 +587,18 @@
                                                                     </tr>
                                                                     <tr class="">
                                                                         <th class="w-1/2 font-serif text-start">Price Per Night (<span class="font-rflex">1</span> Room)</th>
-                                                                        <td class="w-1/2 text-black font-rflex text-start">'.number_format($price_one_single_type_room_one_night,2).'TK</td>
+                                                                        <td class="w-1/2 text-black font-rflex text-start">'.number_format($price_one_single_type_room_one_night,2).' '. $total_hotel_pay_currency.'</td>
                                                                     </tr>';
                                                                     if($row['total_room']>1){
                                                                         echo'<tr class="">
                                                                         <th class="w-1/2 font-serif text-start">Price Per Night (<span class="font-rflex">'.$row['total_room'].'</span> Room)</th>
-                                                                        <td class="w-1/2 text-black font-rflex text-start">'.number_format( $price_one_single_type_room_one_night*$row['total_room'] ,2).'TK</td>
+                                                                        <td class="w-1/2 text-black font-rflex text-start">'.number_format( $price_one_single_type_room_one_night*$row['total_room'] ,2).' '.$total_hotel_pay_currency.'</td>
                                                                     </tr>';
                                                                     }
                                                                     
                                                                 echo' <tr class="">
                                                                         <th class="w-1/2 font-serif text-start">Total (<span class="font-rflex">'.$row['total_room'].'</span> Room <span class="font-rflex">'.$row['night'].'</span> Night)</th>
-                                                                        <td class="w-1/2 text-black font-rflex text-start">'.number_format( $total_full_price_single_type_room ,2).'TK</td>
+                                                                        <td class="w-1/2 text-black font-rflex text-start">'.number_format( $total_full_price_single_type_room ,2).' '.$total_hotel_pay_currency.'</td>
                                                                     </tr>
                                                                 </table>
                                                             </div>

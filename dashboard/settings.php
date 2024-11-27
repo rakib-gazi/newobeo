@@ -1,8 +1,8 @@
 <?php 
 	include ('dashboard-header.php');
-    $note_icons = ['fa-solid  fa-user','fa-solid  fa-hotel','fa-solid  fa-hotel','fa-solid  fa-comments-dollar','fa-solid fa-globe','fa-solid fa-globe','fa-solid fa-money-bill','fa-solid  fa-dollar'];
-    $heading = ['Add User','Hotel','Hotel Address',' Currency','Reservation Source','Reservation Status','Payment Method','Advance Currency'];
-    $nlinks = ['add_user.php','hotel.php','hotelAddress.php','currency.php','source.php','status.php','payment_method.php','advance_currency.php']
+    $note_icons = ['fa-solid  fa-user','fa-solid  fa-hotel','fa-solid  fa-hotel','fa-solid  fa-hotel','fa-solid  fa-comments-dollar','fa-solid fa-globe','fa-solid fa-globe','fa-solid fa-money-bill','fa-solid  fa-dollar'];
+    $heading = ['Add User','Hotel','Hotel Address','Hotel Comission',' Currency','Reservation Source','Reservation Status','Payment Method','Advance Currency'];
+    $nlinks = ['add_user.php','hotel.php','hotelAddress.php','hotelCommision.php','currency.php','source.php','status.php','payment_method.php','advance_currency.php']
 ?>
     <div class="flex">  
         <?php include('dashboard-sidebar.php');?>

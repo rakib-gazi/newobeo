@@ -193,11 +193,6 @@ $expediaExpedaCollects = 0;
                                                         </thead>
                                                         <tbody class="divide-y divide-cyan-950">
                                                             <?php
-                                                            usort($reservationData, function ($a, $b) {
-                                                                $dateA = DateTime::createFromFormat('d-m-Y', $a['C/in']);
-                                                                $dateB = DateTime::createFromFormat('d-m-Y', $b['C/in']);
-                                                                return $dateA->getTimestamp() - $dateB->getTimestamp();
-                                                            });
                                                             $serialNumber = 1;
                                                             $totalSum = 0; // Initialize total sum variable
 
@@ -280,11 +275,6 @@ $expediaExpedaCollects = 0;
                                                         </thead>
                                                         <tbody class="divide-y divide-cyan-950">
                                                             <?php
-                                                             usort($reservationData, function ($a, $b) {
-                                                                $dateA = DateTime::createFromFormat('d-m-Y', $a['C/in']);
-                                                                $dateB = DateTime::createFromFormat('d-m-Y', $b['C/in']);
-                                                                return $dateA->getTimestamp() - $dateB->getTimestamp();
-                                                            });
                                                             $serialNumber = 1;
                                                             $totalSum = 0; // Initialize total sum variable
 
@@ -366,11 +356,6 @@ $expediaExpedaCollects = 0;
                                                         </thead>
                                                         <tbody class="divide-y divide-cyan-950">
                                                             <?php
-                                                             usort($reservationData, function ($a, $b) {
-                                                                $dateA = DateTime::createFromFormat('d-m-Y', $a['C/in']);
-                                                                $dateB = DateTime::createFromFormat('d-m-Y', $b['C/in']);
-                                                                return $dateA->getTimestamp() - $dateB->getTimestamp();
-                                                            });
                                                             $serialNumber = 1;
                                                             $totalSum = 0; // Initialize total sum variable
 
